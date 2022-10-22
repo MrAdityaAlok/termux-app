@@ -21,9 +21,13 @@ jobs:
       run: chmod +x ./gradlew
 
     - name: Build Release APK
+      env:
+        KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS}}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEYSTORE: ${{ secrets.KEYSTORE }}
       run: |
-        export TERMUX_APP_VERSION_NAME="${GITHUB_REF_NAME}" # Used by app/build.gradle
-        export TERMUX_APK_VERSION_TAG="${GITHUB_REF_NAME}" # Used by app/build.gradle
+        export KEYSTORE_FILE="${RUNNER_TEMP}/release.keystore"
+        echo "$KEYSTORE" | base64 -di > "$KEYSTORE_FILE"
         ./gradlew assembleRelease
 
     - name: Create release

@@ -15,8 +15,8 @@ ext {
 android {
     compileSdkVersion project.properties.compileSdkVersion.toInteger()
     ndkVersion = System.getenv("JITPACK_NDK_VERSION") ?: project.properties.ndkVersion
-    def appVersionName = System.getenv("TERMUX_APP_VERSION_NAME") ?: ""
-    def apkVersionTag = System.getenv("TERMUX_APK_VERSION_TAG") ?: ""
+    def appVersionName = System.getenv("TERMUX_APP_VERSION_NAME") ?: System.getenv("GITHUB_REF_NAME")
+    def apkVersionTag = System.getenv("TERMUX_APK_VERSION_TAG") ?: System.getenv("GITHUB_REF_NAME")
     def splitAPKsForDebugBuilds = System.getenv("TERMUX_SPLIT_APKS_FOR_DEBUG_BUILDS") ?: "1"
     def splitAPKsForReleaseBuilds = System.getenv("TERMUX_SPLIT_APKS_FOR_RELEASE_BUILDS") ?: "1"
 
@@ -69,8 +69,8 @@ android {
                 enable ((gradle.startParameter.taskNames.any { it.contains("Debug") } && splitAPKsForDebugBuilds == "1") ||
                     (gradle.startParameter.taskNames.any { it.contains("Release") } && splitAPKsForReleaseBuilds == "1"))
                 reset ()
-                include 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
-                universalApk true
+                include 'arm64-v8a' //'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+                universalApk false
             }
         }
     }
@@ -82,6 +82,12 @@ android {
             storePassword 'xrj45yWGLbsO7W0v'
             keyPassword 'xrj45yWGLbsO7W0v'
         }
+        release {
+          storeFile file(System.getenv("KEYSTORE_FILE"))
+          keyAlias System.getenv("KEY_ALIAS")
+          storePassword System.getenv("KEYSTORE_PASS")
+          keyPassword System.getenv("KEYSTORE_PASS")
+        }
     }
 
     buildTypes {
@@ -89,6 +95,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
 
         debug {
