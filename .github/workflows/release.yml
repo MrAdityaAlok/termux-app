@@ -3,7 +3,7 @@ name: Build & Publish Release APK
 on:
   push:
     tags:
-      - 'mradityaalok-*'
+      - 'v*'
 
 jobs:
   Build:
@@ -26,8 +26,11 @@ jobs:
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEYSTORE: ${{ secrets.KEYSTORE }}
       run: |
-        export KEYSTORE_FILE="${RUNNER_TEMP}/release.keystore"
+        export KEYSTORE_FILE="$RUNNER_TEMP/release.keystore"
         echo "$KEYSTORE" | base64 -di > "$KEYSTORE_FILE"
+
+        export TERMUX_APP_VERSION_NAME="${GITHUB_REF_NAME#v}"
+        export TERMUX_APK_VERSION_TAG="$GITHUB_REF_NAME"
         ./gradlew assembleRelease
 
     - name: Create release
